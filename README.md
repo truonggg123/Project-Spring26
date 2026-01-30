@@ -1,7 +1,9 @@
 # Project-Spring26
 
 
-1. Thành viên 1: Database Logic (database.py)
+1. Thành viên 1: Database Logic (database.py) (Hiếu)
+
+
 •	Nhiệm vụ: Quản lý mọi thứ liên quan đến lưu trữ lâu dài.
 •	Công việc cụ thể:
 o	Cài đặt SQL Server và thư viện pyodbc.
@@ -17,7 +19,9 @@ o	Viết hàm load_history(user_id) trả về một danh sách để hiển th�
 
 •	Mục tiêu: Đảm bảo dữ liệu không bị mất khi tắt ứng dụng.
 
-2. Thành viên 2: Comparison Algorithm (algorithm.py)
+2. Thành viên 2: Comparison Algorithm (algorithm.py) (QUY)
+
+
 •	Nhiệm vụ: Xây dựng bộ máy chấm điểm bằng thuật toán DSA.
 •	Công việc cụ thể:
 o	Tự code thuật toán Levenshtein Distance bằng phương pháp mảng 2 chiều (Quy hoạch động).
@@ -26,7 +30,8 @@ o	Viết thêm logic để so sánh từng từ và đánh dấu màu (ví dụ:
 •	Mục tiêu: Trả về kết quả phân tích chính xác độ lệch giữa câu mẫu và câu người dùng nói.
 
 
-3. Thành viên 3: Suggestion Engine (search_engine.py)
+3. Thành viên 3: Suggestion Engine (search_engine.py)  (ĐĂNG KHOA)
+
 
 •	Nhiệm vụ: Xử lý cấu trúc dữ liệu cây để hỗ trợ người dùng nhập liệu.
 •	Công việc cụ thể:
@@ -36,7 +41,7 @@ o	Tìm một danh sách khoảng 500-1000 từ tiếng Anh thông dụng, viết
 •	Mục tiêu: Khi người dùng gõ từ vào ô tìm kiếm, cây Trie phải trả về danh sách các từ bắt đầu bằng chữ cái đó một cách nhanh nhất.
 
 
-4. Thành viên 4: Speech & AI Handler (speech_module.py)
+4. Thành viên 4: Speech & AI Handler (speech_module.py) (KHOA BÉO)
 
 •	Nhiệm vụ: Phụ trách phần "Nghe" và "Nói" của AI.
 •	Công việc cụ thể:
@@ -46,7 +51,9 @@ o	Viết hàm clean_text(text) để loại bỏ dấu câu, chuyển về chữ
 •	Mục tiêu: Chuyển đổi qua lại giữa âm thanh và văn bản một cách mượt mà.
 
 
-5. Thành viên 5: UI Designer (interface.py)
+5. Thành viên 5: UI Designer (interface.py) (PHÚ ANH)
+
+
 •	Nhiệm vụ: Xây dựng "mặt tiền" của ứng dụng.
 •	Công việc cụ thể:
 o	Sử dụng Gradio tạo 3 Tab: Luyện tập, Tra từ, Lịch sử.
@@ -56,7 +63,9 @@ o	Viết CSS để giao diện trông hiện đại và chuyên nghiệp (căn g
 
 
 
-6. Thành viên 6: Dictionary & Logic Integrator (dictionary_logic.py)
+6. Thành viên 6: Dictionary & Logic Integrator (dictionary_logic.py) (TRƯỜNG)
+
+
 •	Nhiệm vụ: Xử lý dữ liệu từ điển và chuẩn bị cho việc ghép nối.
 •	Công việc cụ thể:
 o	Tìm và xử lý file dữ liệu từ điển (thường là JSON hoặc CSV Anh-Việt).
