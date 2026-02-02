@@ -3,7 +3,10 @@ Search Engine Module - Trie Implementation for Autocomplete
 Author: Dang Khoa
 Purpose: Provide fast word suggestions using Prefix Tree (Trie) data structure
 """
-
+"""
+FFmpeg Installation As noted in your previous status, Whisper requires FFmpeg to process audio files.
+Windows: Download from gyan.dev, extract it, and add the bin folder to your System PATH variables.
+"""
 class TrieNode:
     """Node in the Trie tree"""
     def __init__(self):
