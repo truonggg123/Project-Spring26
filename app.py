@@ -1,13 +1,3 @@
-# --- Patch: disable Gradio's BrotliMiddleware to fix the
-# h11 "Too little data for declared Content-Length" bug on Windows.
-# BrotliMiddleware compresses FileResponse bodies but doesn't update
-# Content-Length, so h11 rejects the response. Easiest fix: make it a no-op.
-import gradio.brotli_middleware as _bm
-async def _passthrough(self, scope, receive, send):
-    await self.app(scope, receive, send)
-_bm.BrotliMiddleware.__call__ = _passthrough
-# --- End patch
-
 import gradio as gr
 import history
 from logic import PronunciationTrainer
@@ -100,7 +90,7 @@ with gr.Blocks(title="English Pronunciation Trainer", theme=gr.themes.Soft(), cs
                         reference_btn = gr.Button("🎧 Generate Sample", variant="secondary")
                         reference_status = gr.Textbox(label="Status", interactive=False, visible=False)
                     
-                    reference_audio = gr.Audio(label="Reference Audio", type="numpy")
+                    reference_audio = gr.Audio(label="Reference Audio", type="filepath")
                     
                     gr.Markdown("---")
                     gr.Markdown("### 🎤 Your Recording")
@@ -108,7 +98,7 @@ with gr.Blocks(title="English Pronunciation Trainer", theme=gr.themes.Soft(), cs
                     user_audio_input = gr.Audio(
                         label="Record your pronunciation",
                         sources=["microphone"],
-                        type="numpy"
+                        type="filepath"
                     )
                     
                     analyze_btn = gr.Button("✨ Analyze My Pronunciation", variant="primary", size="lg")
