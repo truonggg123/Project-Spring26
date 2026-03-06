@@ -9,7 +9,7 @@ import re
 
 # ==============================
 SERVER = r'localhost\SQLEXPRESS03'
-DATABASE = 'DictionaryDB'
+DATABASE = 'PronunciationDB'
 CSV_FILE = 'English - Vietnamese.csv'
 BATCH_SIZE = 1000
 

@@ -1,178 +1,88 @@
-import math
+import string
 
-def levenshtein_matrix(seq1, seq2):
-    """
-    Generates the Levenshtein distance matrix using 2D array (Dynamic Programming).
-    Works for both strings (character-level) and lists of words (token-level).
-    
-    Args:
-        seq1: Source sequence (Target)
-        seq2: Destination sequence (User Input)
-        
-    Returns:
-        2D list representing the DP matrix.
-    """
-    rows = len(seq1) + 1
-    cols = len(seq2) + 1
-    
-    # Initialize 2D array
-    matrix = [[0 for _ in range(cols)] for _ in range(rows)]
+def preprocess_to_list(text: str) -> list:
+    """Làm sạch chuỗi và chuyển thành danh sách từ để so sánh."""
+    if not isinstance(text, str) or not text.strip():
+        return []
+    # Xóa dấu câu bằng string.punctuation và chuyển về chữ thường
+    clean_text = text.lower().translate(str.maketrans('', '', string.punctuation))
+    # Tách từ và loại bỏ khoảng trắng thừa
+    return clean_text.split()
 
-    # Base cases
-    for i in range(rows):
-        matrix[i][0] = i
-    for j in range(cols):
-        matrix[0][j] = j
+def calculate_levenshtein_distance_words(target_list: list, user_list: list) -> int:
+    """Tính khoảng cách Levenshtein giữa hai danh sách từ (Word-level)."""
+    m, n = len(target_list), len(user_list)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
 
-    # Fill matrix
-    for i in range(1, rows):
-        for j in range(1, cols):
-            # Cost is 0 if items match, else 1
-            cost = 0 if seq1[i-1] == seq2[j-1] else 1
-            
-            matrix[i][j] = min(
-                matrix[i-1][j] + 1,      # Deletion
-                matrix[i][j-1] + 1,      # Insertion
-                matrix[i-1][j-1] + cost  # Substitution / Match
+    for i in range(m + 1): dp[i][0] = i
+    for j in range(n + 1): dp[0][j] = j
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            # So sánh toàn bộ từ
+            cost = 0 if target_list[i - 1] == user_list[j - 1] else 1
+            dp[i][j] = min(
+                dp[i - 1][j] + 1,      # Deletion
+                dp[i][j - 1] + 1,      # Insertion
+                dp[i - 1][j - 1] + cost # Substitution
             )
-            
-    return matrix
+    return dp[m][n]
 
-def get_pronunciation_score(s1, s2):
-    """
-    Calculates a score (0-100) based on character-level Levenshtein distance.
-    
-    Args:
-        s1: Target string (Sample sentence)
-        s2: User input string
-        
-    Returns:
-        float: Score between 0 and 100
-    """
-    if s1 is None: s1 = ""
-    if s2 is None: s2 = ""
-    
-    # Normalize strings
-    s1 = s1.lower().strip()
-    s2 = s2.lower().strip()
-    
-    if not s1 and not s2:
-        return 100.0
-    if not s1 or not s2:
-        return 0.0
+def get_pronunciation_score(target: str, user: str) -> int:
+    """Tính điểm dựa trên độ tương đồng của danh sách từ."""
+    target_words = preprocess_to_list(target)
+    user_words = preprocess_to_list(user)
 
-    # Get matrix
-    matrix = levenshtein_matrix(s1, s2)
+    if not target_words:
+        return 0
     
-    # The Levenshtein distance is the value in the bottom-right cell
-    distance = matrix[-1][-1]
+    distance = calculate_levenshtein_distance_words(target_words, user_words)
+    max_len = len(target_words)
     
-    # Calculate score based on the length of the longer string
-    max_len = max(len(s1), len(s2))
-    
-    if max_len == 0:
-        return 100.0
-        
-    score = (1 - distance / max_len) * 100
-    return max(0.0, round(score, 2))
+    # Công thức tính điểm dựa trên đơn vị Từ
+    score = (1 - (distance / max_len)) * 100
+    return max(0, min(100, int(round(score))))
 
-def compare_words(s1, s2):
-    """
-    Performs word-by-word comparison to generate colored feedback.
+def get_visual_comparison(target: str, user: str) -> str:
+    """Hiển thị HTML với logic đã loại bỏ dấu câu khỏi việc so sánh."""
+    # 1. Chuẩn bị dữ liệu hiển thị (giữ nguyên để không mất chữ của target)
+    target_display = target.split() 
     
-    Args:
-        s1: Target string (Sample)
-        s2: User input string (Spoken)
-        
-    Returns:
-        List of dictionaries containining 'word' and 'color' (green/red).
-        Example: [{'word': 'hello', 'color': 'green'}, {'word': 'word', 'color': 'red'}]
-    """
-    if s1 is None: s1 = ""
-    if s2 is None: s2 = ""
-    
-    # Tokenize into words
-    words1 = s1.lower().strip().split()
-    words2 = s2.strip().split() # Keep case for display if needed, but compare lower
-    
-    # Create comparison version for logic
-    words2_lower = [w.lower() for w in words2]
-    
-    matrix = levenshtein_matrix(words1, words2_lower)
-    
-    # Backtrack to find alignment
-    i, j = len(words1), len(words2)
-    alignment = []
-    
+    # 2. Chuẩn bị dữ liệu so sánh (đã xóa dấu câu)
+    target_clean = [w.translate(str.maketrans('', '', string.punctuation)).lower() for w in target_display]
+    user_clean = preprocess_to_list(user)
+
+    m, n = len(target_clean), len(user_clean)
+    dp = [[0] * (n + 1) for _ in range(m + 1)]
+
+    for i in range(m + 1): dp[i][0] = i
+    for j in range(n + 1): dp[0][j] = j
+
+    for i in range(1, m + 1):
+        for j in range(1, n + 1):
+            cost = 0 if target_clean[i - 1] == user_clean[j - 1] else 1
+            dp[i][j] = min(dp[i-1][j] + 1, dp[i][j-1] + 1, dp[i-1][j-1] + cost)
+
+    # 3. Truy vết ngược để tạo HTML
+    i, j = m, n
+    html_parts = []
+
     while i > 0 or j > 0:
-        # Prio 1: Match (Diagonal with no cost)
-        # Note: We check words2_lower for comparison
-        if i > 0 and j > 0 and words1[i-1] == words2_lower[j-1]:
-            alignment.append({"word": words2[j-1], "color": "green", "status": "correct"})
-            i -= 1
-            j -= 1
-            
-        # Prio 2: Substitution (Diagonal with cost)
-        # We classify substitution as 'red' (incorrect)
-        elif i > 0 and j > 0 and matrix[i][j] == matrix[i-1][j-1] + 1:
-            alignment.append({"word": words2[j-1], "color": "red", "status": "substitution"})
-            i -= 1
-            j -= 1
-            
-        # Prio 3: Insertion (Left) - User said an extra word
-        # We mark extra words as red (or maybe grey/yellow if spec allowed, but "red for incorrect" covers this)
-        elif j > 0 and matrix[i][j] == matrix[i][j-1] + 1:
-            alignment.append({"word": words2[j-1], "color": "red", "status": "insertion"})
-            j -= 1
-            
-        # Prio 4: Deletion (Up) - User missed a word
-        # Since we only return User's words colored, we don't return the deleted word in the list of "user words".
-        # However, to keep the flow correct, we just decrement i.
-        # If we wanted to show missing words, we could add them with a special color.
-        elif i > 0 and matrix[i][j] == matrix[i-1][j] + 1:
-            # alignment.append({"word": f"[{words1[i-1]}]", "color": "gray"}) # Optional: Show missing
-            i -= 1
-            
-        else:
-            # Fallback for complex overlapping cases, usually shouldn't happen with standard logical priority
-            # If we are here, we prioritize moving towards smaller indices
-            if j > 0:
-                alignment.append({"word": words2[j-1], "color": "red", "status": "unknown"})
-                j -= 1
-            elif i > 0:
+        # Trường hợp Khớp (Correct)
+        if i > 0 and j > 0 and target_clean[i-1] == user_clean[j-1]:
+            html_parts.append(f'<span style="color: #28a745;">{target_display[i-1]}</span>')
+            i -= 1; j -= 1
+        # Trường hợp Sai hoặc Thiếu (Incorrect/Missing)
+        elif i > 0:
+            html_parts.append(f'<span style="color: #dc3545;">{target_display[i-1]}</span>')
+            # Nếu là phép thay thế (Substitution), giảm cả i và j
+            if j > 0 and dp[i][j] == dp[i-1][j-1] + 1:
+                i -= 1; j -= 1
+            else: # Phép xóa (Deletion/Missing)
                 i -= 1
+        # Trường hợp Thừa từ (Extra - User nói dư)
+        else:
+            j -= 1
 
-    # Reverse because we backtracked
-    return alignment[::-1]
-
-if __name__ == "__main__":
-    # Test Cases
-    print("=== Testing Levenshtein Algorithm ===")
-    
-    # 1. Exact Match
-    t1 = "Hello world"
-    u1 = "Hello world"
-    print(f"\nTarget: '{t1}'\nUser:   '{u1}'")
-    print(f"Score: {get_pronunciation_score(t1, u1)}")
-    print(f"Highlight: {compare_words(t1, u1)}")
-    
-    # 2. Minor differences
-    t2 = "The quick brown fox"
-    u2 = "The quick brwn fox" # Typo
-    print(f"\nTarget: '{t2}'\nUser:   '{u2}'")
-    print(f"Score: {get_pronunciation_score(t2, u2)}")
-    print(f"Highlight: {compare_words(t2, u2)}")
-    
-    # 3. Major differences
-    t3 = "I like to code"
-    u3 = "I love coding" 
-    print(f"\nTarget: '{t3}'\nUser:   '{u3}'")
-    print(f"Score: {get_pronunciation_score(t3, u3)}")
-    print(f"Highlight: {compare_words(t3, u3)}")
-    
-    # 4. Extra/Missing words
-    t4 = "This is a test"
-    u4 = "This is test" # 'a' missing
-    print(f"\nTarget: '{t4}'\nUser:   '{u4}'")
-    print(f"Score: {get_pronunciation_score(t4, u4)}")
-    print(f"Highlight: {compare_words(t4, u4)}")
+    html_parts.reverse()
+    return " ".join(html_parts)
