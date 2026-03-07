@@ -31,11 +31,7 @@ MOCK_MODE = os.getenv("MOCK_MODE", "false").strip().lower() in {"1", "true", "ye
 trainer = PronunciationTrainer(mock_mode=MOCK_MODE)
 dict_logic = DictionaryLogic()
 
-# Nạp toàn bộ dữ liệu từ database/CSV vào hệ thống gợi ý
-print("Đang tải dữ liệu từ vựng cho gợi ý...")
-for word in dict_logic.get_all_words():
-    trie.insert_word(word)
-print("Hoàn tất tải dữ liệu gợi ý.")
+
 
 LESSONS = [
     "Lesson 1: Daily Conversations",
