@@ -34,6 +34,51 @@ body, .gradio-container {
     box-shadow: 4px 0 10px rgba(0,0,0,0.1);
 }
 
+.user-tag {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05)) !important;
+    padding: 10px 14px !important;
+    border-radius: 12px !important;
+    color: white !important;
+    font-size: 14px !important;
+    margin-bottom: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.05);
+
+    /* --- DISABLE GRADIO LOADING OVERLAYS --- */
+    opacity: 1 !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    pointer-events: auto !important;
+}
+
+/* Force everything inside to be visible and have no blur/opacity */
+.user-tag, .user-tag *, .user-tag::before, .user-tag::after {
+    opacity: 1 !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+}
+
+/* Aggressively target Gradio's processing classes to prevent their styles from applying */
+.pending, .loading, .generating, .processing {
+     filter: none !important;
+}
+
+.user-tag * {
+    color: white !important;
+}
+
+.user-tag p {
+    margin: 0 !important;
+    line-height: 1.4 !important;
+}
+
+.user-tag strong {
+    font-size: 16px !important;
+    color: #FFD700 !important; /* Golden color for username to stand out */
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+    margin-left: 4px;
+}
+
 .logo-area {
     font-size: 24px; font-weight: 800; color: white;
     margin-bottom: 30px; padding-left: 10px;
@@ -62,14 +107,61 @@ body, .gradio-container {
 
 .content-col { padding: 30px !important; background-color: var(--main-bg); }
 
+.search-container {
+    position: relative;
+    width: 100%;
+}
+
 .search-row {
     display: flex; align-items: center; gap: 0;
     border: 1px solid #E5E7EB; border-radius: 30px;
     padding: 6px 16px; background: white;
     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     transition: all 0.2s;
+    width: 100%;
 }
 .search-row:focus-within { border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+
+.suggestions-col {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    z-index: 50;
+    margin-top: 8px;
+    padding: 0 !important;
+    gap: 0 !important;
+    max-height: 250px;
+    overflow-y: auto;
+    border: 1px solid #E5E7EB;
+}
+
+.suggestion-btn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    text-align: left !important;
+    padding: 12px 20px !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+    font-size: 16px !important;
+    color: #1F2937 !important;
+    margin: 0 !important;
+    border-bottom: 1px solid #F3F4F6 !important;
+}
+
+.suggestion-btn:last-child {
+    border-bottom: none !important;
+}
+
+.suggestion-btn:hover {
+    background-color: #F8FAFC !important;
+    color: #2563EB !important;
+}
 
 .lang-select { border: none !important; box-shadow: none !important; background: transparent !important; width: 140px !important; font-weight: 600 !important; color: #1F2937 !important; }
 .search-input { border: none !important; box-shadow: none !important; background: transparent !important; flex: 1; }
@@ -127,7 +219,11 @@ body, .gradio-container {
 .score-good { border: 8px solid #4CAF50; color: #4CAF50; }
 .score-average { border: 8px solid #FF9800; color: #FF9800; }
 .score-bad { border: 8px solid #F44336; color: #F44336; }
+
 .error { color: red; font-weight: bold; }
+
+
+
 """
 
 def format_dict_result(result):

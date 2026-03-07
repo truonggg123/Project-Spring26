@@ -192,7 +192,7 @@ class PronunciationTrainer:
     def calculate_final_score(self, confidence_score, ipa_similarity):
         confidence_score = max(0.0, min(1.0, float(confidence_score)))
         ipa_similarity = max(0.0, min(100.0, float(ipa_similarity)))
-        return (ipa_similarity * 0.6) + (confidence_score * 100.0 * 0.4)
+        return (ipa_similarity * 1) + (confidence_score * 100.0 * 0.)
 
     def process_pronunciation(self, target_text, audio, user_id=None):
         """Main processing function linked to UI."""
@@ -227,8 +227,8 @@ class PronunciationTrainer:
             visual_feedback = self.generate_visual_feedback(target_ipa, user_ipa)
             details = (
                 f"Transcribed: \"{user_text}\"\n"
-                f"Similarity: {similarity_ratio * 100:.1f}%\n"
-                f"Confidence: {confidence_score * 100:.1f}%"
+                f"Similarity: {similarity_ratio * 100:.1f}%"
+                # f"Confidence: {confidence_score * 100:.1f}%"
             )
 
             updated_history = history.save_attempt(user_id, target_text, user_text, final_score, similarity_ratio)

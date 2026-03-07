@@ -20,6 +20,7 @@ import history
 import auth
 from logic import PronunciationTrainer
 from dictionary_logic import DictionaryLogic
+from search_engine import trie
 
 from ui_components import MAZII_CSS, format_dict_result, get_nav_btn_css
 
@@ -29,6 +30,12 @@ from ui_components import MAZII_CSS, format_dict_result, get_nav_btn_css
 MOCK_MODE = os.getenv("MOCK_MODE", "false").strip().lower() in {"1", "true", "yes", "on"}
 trainer = PronunciationTrainer(mock_mode=MOCK_MODE)
 dict_logic = DictionaryLogic()
+
+# Nạp toàn bộ dữ liệu từ database/CSV vào hệ thống gợi ý
+print("Đang tải dữ liệu từ vựng cho gợi ý...")
+for word in dict_logic.get_all_words():
+    trie.insert_word(word)
+print("Hoàn tất tải dữ liệu gợi ý.")
 
 LESSONS = [
     "Lesson 1: Daily Conversations",
@@ -151,7 +158,7 @@ with gr.Blocks(title="SpeakMaster AI", theme=gr.themes.Soft()) as app:
         # ── SIDEBAR (Left) ──
         with gr.Column(scale=1, min_width=250, elem_classes=["sidebar-col"]):
             gr.HTML('<div class="logo-area">SpeakMaster</div>')
-            user_display = gr.Markdown("Người dùng: **Bản khách**")
+            user_display = gr.Markdown("👤 Người dùng: **Bản khách**", elem_classes=["user-tag"])
             
             # Navigation Buttons
             btn_dict     = gr.Button("Tra cứu", elem_classes=["nav-btn", "active"])
@@ -166,28 +173,33 @@ with gr.Blocks(title="SpeakMaster AI", theme=gr.themes.Soft()) as app:
             
             gr.Markdown("### Chào ngày mới !")
 
-            # ── SEARCH BAR ──
-            with gr.Row(elem_classes=["search-row"]):
-                    lang_drp = gr.Dropdown(
-                        choices=["Anh - Việt", "Việt - Anh"], 
-                        value="Anh - Việt", 
-                        container=False, 
-                        elem_classes=["lang-select"],
-                        interactive=True
-                    )
-                    search_txt = gr.Textbox(
-                        placeholder="Nhập từ vựng cần tra cứu...", 
-                        container=False, 
-                        elem_classes=["search-input"],
-                        scale=5,
-                        show_label=False
-                    )
-                    search_btn = gr.Button(
-                        value="",
-                        scale=0, 
-                        variant="secondary", 
-                        elem_classes=["search-btn-icon"]
-                    )
+            # ── SEARCH BAR AND SUGGESTIONS ──
+            with gr.Column(elem_classes=["search-container"]):
+                with gr.Row(elem_classes=["search-row"]):
+                        lang_drp = gr.Dropdown(
+                            choices=["Anh - Việt", "Việt - Anh"], 
+                            value="Anh - Việt", 
+                            container=False, 
+                            elem_classes=["lang-select"],
+                            interactive=True
+                        )
+                        search_txt = gr.Textbox(
+                            placeholder="Nhập từ vựng cần tra cứu...", 
+                            container=False, 
+                            elem_classes=["search-input"],
+                            scale=5,
+                            show_label=False
+                        )
+                        search_btn = gr.Button(
+                            value="",
+                            scale=0, 
+                            variant="secondary", 
+                            elem_classes=["search-btn-icon"]
+                        )
+                
+                # ── GỢI Ý (SUGGESTIONS) ──
+                with gr.Column(visible=False, elem_classes=["suggestions-col"]) as suggestion_row:
+                    sugg_btns = [gr.Button(visible=False, elem_classes=["suggestion-btn"]) for _ in range(8)]
             
             # ── VIEW: DICTIONARY ──
             with gr.Column(visible=True, elem_classes=["transparent-group"]) as view_dict:
@@ -267,7 +279,7 @@ with gr.Blocks(title="SpeakMaster AI", theme=gr.themes.Soft()) as app:
                 gr.update(visible=True),  # show main
                 uid, 
                 u,
-                f"Người dùng: **{u}**",
+                f"👤 Người dùng: **{u}**",
                 history.load_data(uid) # load real history
             )
         return gr.update(value=msg), gr.update(), None, "", gr.update(), gr.update()
@@ -328,10 +340,52 @@ with gr.Blocks(title="SpeakMaster AI", theme=gr.themes.Soft()) as app:
     btn_cat.click(lambda: switch_tab("practice"), outputs=[btn_dict, btn_practice, btn_history, view_dict, view_practice, view_history])
 
     # Dictionary Events
-    search_txt.submit(lambda x: gr.update(value=lookup_word(x), visible=True), inputs=[search_txt], outputs=[dict_result])
-    search_btn.click(lambda x: gr.update(value=lookup_word(x), visible=True), inputs=[search_txt], outputs=[dict_result])
-    search_txt.submit(lambda: gr.update(visible=False), outputs=[daily_word_row])
-    search_btn.click(lambda: gr.update(visible=False), outputs=[daily_word_row])
+    suppress_state = gr.State(False)
+
+    def do_search(word):
+        if not word: return gr.update(), gr.update(), gr.update()
+        return gr.update(value=lookup_word(word), visible=True), gr.update(visible=False), gr.update(visible=False)
+
+    search_txt.submit(do_search, inputs=[search_txt], outputs=[dict_result, daily_word_row, suggestion_row])
+    search_btn.click(do_search, inputs=[search_txt], outputs=[dict_result, daily_word_row, suggestion_row])
+
+    def update_suggestions(prefix, suppress):
+        if suppress:
+            return [gr.update(visible=False)] + [gr.update(visible=False)]*8 + [False]
+            
+        if not prefix:
+            return [gr.update(visible=False)] + [gr.update(visible=False)]*8 + [False]
+        
+        suggs = trie.get_suggestions(prefix.lower())[:8]
+        if not suggs:
+            return [gr.update(visible=False)] + [gr.update(visible=False)]*8 + [False]
+        
+        updates = [gr.update(visible=True)]
+        for i in range(8):
+            if i < len(suggs):
+                updates.append(gr.update(visible=True, value=suggs[i]))
+            else:
+                updates.append(gr.update(visible=False))
+        return updates + [False]
+
+    search_txt.change(
+        fn=update_suggestions,
+        inputs=[search_txt, suppress_state],
+        outputs=[suggestion_row] + sugg_btns + [suppress_state]
+    )
+    
+    def btn_click_action(word, current_txt):
+        will_change = (word != current_txt)
+        txt_update = gr.update(value=word) if will_change else gr.update()
+        res = do_search(word)
+        return txt_update, res[0], res[1], res[2], will_change
+
+    for btn in sugg_btns:
+        btn.click(
+            fn=btn_click_action,
+            inputs=[btn, search_txt],
+            outputs=[search_txt, dict_result, daily_word_row, suggestion_row, suppress_state]
+        )
     
     # Practice Events
     def update_samples_list(lesson):
