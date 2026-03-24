@@ -154,7 +154,7 @@ with gr.Blocks(title="SpeakMaster AI", theme=gr.themes.Soft()) as app:
         # ── SIDEBAR (Left) ──
         with gr.Column(scale=1, min_width=250, elem_classes=["sidebar-col"]):
             gr.HTML('<div class="logo-area">SpeakMaster</div>')
-            user_display = gr.Markdown("👤 Người dùng: **Bản khách**", elem_classes=["user-tag"])
+            user_display = gr.Markdown("Người dùng: **Bản khách**", elem_classes=["user-tag"])
             
             # Navigation Buttons
             btn_dict     = gr.Button("Tra cứu", elem_classes=["nav-btn", "active"])
@@ -173,7 +173,7 @@ with gr.Blocks(title="SpeakMaster AI", theme=gr.themes.Soft()) as app:
             with gr.Column(elem_classes=["search-container"]):
                 with gr.Row(elem_classes=["search-row"]):
                         lang_drp = gr.Dropdown(
-                            choices=["Anh - Việt", "Việt - Anh"], 
+                            choices=["Anh - Việt"], 
                             value="Anh - Việt", 
                             container=False, 
                             elem_classes=["lang-select"],
@@ -210,13 +210,13 @@ with gr.Blocks(title="SpeakMaster AI", theme=gr.themes.Soft()) as app:
             # ── VIEW: PRACTICE ──
             with gr.Group(visible=False) as view_practice:
                 with gr.Column(elem_classes=["custom-card"]):
-                    gr.Markdown("### 🎤 Luyện nói cùng AI")
+                    gr.Markdown("### Luyện nói cùng AI")
                     
                     lesson_sel = gr.Dropdown(choices=LESSONS, value=LESSONS[0], label="🎓 Chọn bài học")
                     sample_sel = gr.Dropdown(
                         choices=SAMPLE_SCRIPTS[LESSONS[0]], 
                         value=SAMPLE_SCRIPTS[LESSONS[0]][0], 
-                        label="📝 Chọn mẫu câu"
+                        label="Chọn mẫu câu"
                     )
                     script_display = gr.Textbox(
                         value=SAMPLE_SCRIPTS[LESSONS[0]][0], 
@@ -226,12 +226,12 @@ with gr.Blocks(title="SpeakMaster AI", theme=gr.themes.Soft()) as app:
                     )
 
                     with gr.Row():
-                        reference_btn = gr.Button("🎧 Nghe mẫu", variant="secondary")
+                        reference_btn = gr.Button("Nghe mẫu", variant="secondary")
                         reference_status = gr.Textbox(label="Status", interactive=False, visible=False)
                     reference_audio = gr.Audio(label="Giọng đọc mẫu", type="numpy")
 
                     audio_in = gr.Audio(label="Ghi âm giọng của bạn", sources=["microphone"], type="numpy")
-                    analyze_btn = gr.Button("✨ Kiểm tra phát âm", variant="primary", size="lg")
+                    analyze_btn = gr.Button("Kiểm tra phát âm", variant="primary", size="lg")
                     
                     gr.Markdown("#### Kết quả")
                     with gr.Row():
@@ -249,8 +249,8 @@ with gr.Blocks(title="SpeakMaster AI", theme=gr.themes.Soft()) as app:
             # ── VIEW: HISTORY ──
             with gr.Group(visible=False) as view_history:
                 with gr.Column(elem_classes=["custom-card"]):
-                    gr.Markdown("### 📜 Lịch sử học tập")
-                    refresh_btn = gr.Button("🔄 Làm mới", size="sm")
+                    gr.Markdown("### Lịch sử học tập")
+                    refresh_btn = gr.Button("Làm mới", size="sm")
                     history_table = gr.Dataframe(
                         headers=["Date", "Target Text", "Your Speech", "Score", "Similarity"],
                         datatype=["str", "str", "str", "number", "str"],

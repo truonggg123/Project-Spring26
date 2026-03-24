@@ -38,7 +38,7 @@ BEGIN
     CREATE TABLE Users (
         UserID    INT           IDENTITY(1,1) PRIMARY KEY,
         Username  NVARCHAR(100) NOT NULL UNIQUE,
-        Password  NVARCHAR(256) NOT NULL,        -- stores SHA-256 hash from Python
+        Password  NVARCHAR(255) NOT NULL,        -- stores SHA-256 hash from Python
         CreatedAt DATETIME      DEFAULT GETDATE()
     );
     PRINT 'Table Users created.';
